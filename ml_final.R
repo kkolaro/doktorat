@@ -37,10 +37,6 @@ tek_seting <- getOption("warn")
 
 options(warn = -1)
 
-
-# 1. FORMIRANJE  DATA SETA
-
-
 # Import podataka
 
 stecaj_1<-read.arff(choose.files())# RWeka, file 5
@@ -58,6 +54,7 @@ stecaj<-rbind(stecaj_1,samo_stecaj2,samo_stecaj3,samo_stecaj4)
 
 
 # Random preraspodela uzoraka
+
 set.seed(1)
 
 stecaj<-stecaj[sample(1:nrow(stecaj)),]
@@ -69,6 +66,11 @@ colnames(stecaj)[65]<-'Stecaj'
 # Provera balansiranosti podataka
 
 round (prop.table( as.table(table(stecaj$Stecaj))),3)
+
+
+
+
+# 1. FORMIRANJE  DATA SETA
 
 
 # 2. OPIS PODATAKA
@@ -137,7 +139,7 @@ hist(stecaj_bezNA$Attr29)
 
 
 corelacija<-cor(stecaj_bezNA[,2:64])# korelacija prediktora
-corrplot(corelacija,type="full",order="hclust",tl.col='black',tl.pos='n') # plava boja, pozitivna korelacija, crvena negativna. Intezitet boje odgovara intezitetu lin zavisnosti
+corrplot(corelacija,method='number',type="upper",order="hclust",tl.col='black',tl.pos='n') # plava boja, pozitivna korelacija, crvena negativna. Intezitet boje odgovara intezitetu lin zavisnosti
 
 corr_cross(stecaj_bezNA[,2:64], max_pvalue = 0.05, top = 10)# package lares. Parovi 10 znacajnih korelacija(p-value<0.05) U plavoj boji su pozitivne korelacije. Korelacije vece od 5%
 
@@ -193,7 +195,7 @@ prop.table(table(train$Stecaj))
 prop.table(table(test$Stecaj))
 
 
-# 8. KREIRANJE PRINCIPALNIH KOMPONENTI PC
+# 7. KREIRANJE PRINCIPALNIH KOMPONENTI pc.
 
 train_pc <- stecaj_bezekstrema_bezNA[split,]# Stecaj, Attr1 ....Attr64
 test_pc  <- stecaj_bezekstrema_bezNA[-split,]
@@ -223,10 +225,10 @@ predict_pctest<-predict(pc,test_pc[,-1])[,1:40]
 test_pc<-data.frame(predict_pctest, Stecaj=test_pc$Stecaj)
 
 
-# 9. PREDIKTIVNI MODELI
+# 8. PREDIKTIVNI MODELI
 
 
-# 9.1 LOGISTICKA REGRESIJA
+# 8.1 LOGISTICKA REGRESIJA
 
 # Kreiranje modela
 
@@ -243,19 +245,22 @@ predict_lr<-model_lr%>%predict(test,type="response")
 predicted_lr<-ifelse(predict_lr>0.3,"1","0")
 confusionMatrix(factor(predicted_lr), test$Stecaj, positive = '1')
 
+# Model_lr samo sa znacajnim prediktorima
+
+model_lr1<-glm(Stecaj ~ Attr21 + Attr24 + Attr25 + Attr37 + Attr38 +Attr41 +Attr46 +Attr55 , data=train, family = binomial)
+summary(model_lr1)
+
+
 # Multikolinearnost, ne utice na tacnost klasifikacionog  modela, ali utice na vrednost koeficijenata i tako odnos izmedju outputa i nezavisne promenjive
 # Vrednosti  Variance inflation factor (VIF) u rangu 1-5 oznacavaju srednji nivo kolinearnosti
 
-vif_prediktora<-data.frame(vif(model_lr)) # car paket. VIF prediktora pokazuje koliko dobro se taj prediktor moze 'objasniti' drugim prediktorom
+vif_prediktora<-data.frame(vif(model_lr1)) # car paket. VIF prediktora pokazuje koliko dobro se taj prediktor moze 'objasniti' drugim prediktorom
+# Moze se pojaviti greska kada su dve ili vise varijabli mnogo (ili perfektno) correlated.
+
 vif_prediktora<-rownames_to_column(vif_prediktora)
 
-max_koli<-vif_prediktora[order(vif_prediktora$vif.model_lr., decreasing = T),]
-max_koli[which(max_koli$vif.model_lr.>10),]
-
-# Model bez prediktora sa visokom korelacijom
-
-model_lr1<-glm(Stecaj~ . -Attr18 -Attr14 -Attr7 -Attr10 -Attr2 -Attr52 -Attr32 -Attr8 -Attr17 -Attr22, data=train, family = binomial)
-summary(model_lr1)
+max_koli<-vif_prediktora[order(vif_prediktora$vif.model_lr1., decreasing = T),]
+max_koli[which(max_koli$vif.model_lr1>5),]
 
 
 # Predikcija
@@ -280,17 +285,16 @@ aictab(cand.set = models, modnames = model.names)
 
 
 
-
 # Najvazniji, najinformativniji prediktori
 
-coef(model_lr)# Intercept i 64 prediktora
-df_regkoeficijenti<-data.frame(coef(model_lr))# uklanjam intercept
+coef(model_lr1)# Intercept i 64 prediktora
+df_regkoeficijenti<-data.frame(coef(model_lr1))# uklanjam intercept
 df_regkoeficijenti<-rownames_to_column(data.frame(df_regkoeficijenti))# package tibble
 df_regkoeficijenti<-df_regkoeficijenti[-1,]
 colnames(df_regkoeficijenti)<-c('Prediktori','RegKoeficijenti')
 df_regkoeficijenti[order(-abs(df_regkoeficijenti$RegKoeficijenti)),][c(1:5),]# 5 najvecih reg koeficijenata po apsolutnoj vrednosti 
 
-# 9.1.1 Log regresija sa PC
+# 8.1.1 Log regresija sa PC
 
 model_lrpc<-glm(Stecaj~ ., data=train_pc, family = binomial)#model sa PC
 summary(model_lrpc)
@@ -306,7 +310,7 @@ confusionMatrix(factor(predicted_lrpc), test_pc$Stecaj, positive = '1')
 
 
 
-# 9.1.2 PENALIZED LOGISTIC REGRESSION, regularizacija modela (ne proredimo prema AIC)
+# 8.1.1 PENALIZED LOGISTIC REGRESSION, regularizacija modela (ne proredimo prema AIC)
 
 #Lasso  regresija
 
@@ -385,7 +389,7 @@ predict_elasnet<-model_elasnet%>%predict(newx=x_test,type="response")
 
 # Tacnost modela
 
-predicted_elasnet<-ifelse(predict_elasnet>0.3,"1","0")
+predicted_elasnet<-ifelse(predict_elasnet>0.1,"1","0")
 confusionMatrix(factor(predicted_elasnet), test$Stecaj, positive = '1')
 
 # Najvazniji, najinformativniji prediktori
@@ -398,12 +402,12 @@ df_regkoeficijenti<-df_regkoeficijenti[-1,]
 df_regkoeficijenti[order(-abs(df_regkoeficijenti$x)),][c(1:5),]# 5 najvecih reg koeficijenata po apsolutnoj vrednosti 
 
 
-# 9.1.3 LDA i QDA (koriscenjem prediktora najtacnijeg  lasso regresionog modela)
+# 8.1.2 LDA i QDA (koriscenjem prediktora najtacnijeg  lasso regresionog modela)
 
 
 # LDA
 
-model_lda<-lda(Stecaj~ . -Attr6 -Attr7 -Attr12 -Attr14 -Attr18 -Attr22 -Attr23 -Attr31 -Attr53 -Attr61 , data=train)
+model_lda<-lda(Stecaj~ . -Attr18 -Attr7 -Attr14 -Attr52 -Attr32 -Attr10 -Attr2 -Attr17 -Attr8 -Attr54 , data=train)
 model_lda
 
 par(mar=c(1,1,1,1))
@@ -434,7 +438,7 @@ impattr_lda[order(-abs(impattr_lda$RegKoeficijenti)),][c(1:5),]# 5 najvecih reg 
 
 # QDA
 
-model_qda<-qda(Stecaj~ . -Attr6 -Attr7 -Attr12 -Attr14 -Attr18 -Attr22 -Attr23 -Attr31 -Attr53 -Attr61 , data=train)
+model_qda<-qda(Stecaj~ . -Attr18 -Attr7 -Attr14 -Attr52 -Attr32 -Attr10 -Attr2 -Attr17 -Attr8 -Attr54 , data=train)
 model_qda
 
 # Predikcija
@@ -449,7 +453,7 @@ confusionMatrix(factor(predicted_qda), test$Stecaj, positive = '1')
 
 
 
-# 9.2 STABLA ODLUCIVANJA
+# 8.2 STABLA ODLUCIVANJA
 
 # Kreiranje modela
 
@@ -462,13 +466,13 @@ plotcp(model_tree)
 best_cp <- model_tree$cptable[which.min(model_tree$cptable[,"xerror"]),"CP"]
 cat("Optimalna vrednost cp je ",best_cp,"\n")
 
-model_tree1<-prune(model_tree,cp=best_cp)
+model_tree1<-prune(model_tree,cp=best_cp)# ako stavim 0.01 stablo ce biti isto kao u modelu model_tree.Biram manje kompleksno stablo
 model_tree1
 
 # Model stabla nakon pruninga
 rpart.plot(model_tree1)
 
-#  5 najinfoirmativnijih prediktora sa najvecim  mean decrease accuracy nu slucaju da se izostave 
+#  5 najinfoirmativnijih prediktora sa najvecim  mean decrease accuracy 
 
 impattr_tree1<-data.frame(model_tree1$variable.importance)
 impattr_tree1<-rownames_to_column(impattr_tree1)# package tibble
@@ -487,10 +491,10 @@ confusionMatrix(factor(predicted_tree),
                 test$Stecaj,positive = "1")
 
 
-# 9.3 RANDOM FOREST
+# 8.3 RANDOM FOREST
 
 
-trControl=trainControl("cv",number=5)# repeates - izostavljeno zbog vremenski dugog ucenja modela
+trControl=trainControl("cv",number=5)# repeates, izostavljeno zbog performansi
 
 # Kreiranje modela
 
@@ -524,7 +528,7 @@ confusionMatrix(factor(predicted_rf),
 
 
 
-# 9.4.1 BOOSTING MODEL,  xgboost sa xgbTree. Koristi sve corove procesora, paralelno procesiranje
+# 8.4 BOOSTING MODEL,  xgboost sa xgbTree. Koristi sve corove procesora, paralelno procesiranje
 
 
 trControl=trainControl("cv",number=5)
@@ -534,7 +538,7 @@ trControl=trainControl("cv",number=5)
 model_xgboost<-train(Stecaj~., data=train,method="xgbTree",trControl=trControl,base_score=0.3)
 
 # Optimalni parametri modela, nrounds je broj iteracija, eta learning rate, 
-#gamma = 0 sledi nema regularizacije , subsumple je br. uzoraka za svako stablo, ako je jednak 1, svi uzorci
+#gamma nula sledi nema regularizacije , subsumple je br. uzoraka za svako stablo, ako jedan svi
 
 model_xgboost$bestTune
 
@@ -555,26 +559,25 @@ confusionMatrix(factor(predicted_xgboost),
                 test$Stecaj,positive = "1")
 
 
-# Trazenje optimalne vrednosti granicne vrednosti verovatnoce stecaja, za rad kako bi algorimi bili uporedivi uzete je ista vrednost , 0.3
+# Trazenje optimalne vrednosti granicne vrednosti verovatnoce stecaja, za rad kako bi algorimi bili uporedivi uzete je ista vrednost
 actuals<-test$Stecaj
 
 perf1<-performance(prediction(predicted_xgboost, actuals),"tpr", "fpr") # ROCR
 
 plot(perf1,colorize=TRUE,print.cutoffs.at=seq(0.1,by=0.1))
 
+# 8.4.1 xgboost
 
-# 9.4.2 xgboost, varijanta druga. Znacajno brzi proces ucenja
-
-# Trening i test podaci transformisu se  u matricni oblik
+#define predictor and response variables in training set
 
 train_x = data.matrix(train[, -65])
 train_y =as.numeric(train[,65])-1
 
-
+#define predictor and response variables in testing set
 test_x = data.matrix(test[, -65])
 test_y = as.numeric(test[,65])-1
 
-
+#define final training and testing sets
 xgb_train = xgb.DMatrix(data = train_x, label = train_y)
 xgb_test = xgb.DMatrix(data = test_x, label = test_y)
 
@@ -606,12 +609,12 @@ predicted_xgboost <- ifelse(predict_xgboost> 0.3, 1,0)
 confusionMatrix(factor(predicted_xgboost),
                 test$Stecaj,positive = "1")
 
-# 9.5 NB
+# 8.5 NB
 
 # Kreiranje modela
 
 model_nb<-naiveBayes(Stecaj~., data=train)
-model_nb # dobijama  mean i sd za svaki numericki prediktor, razlicitih klasa
+model_nb # vidimo mean i sd za svaki numericki prediktor razlicitih klasa
 
 train%>%filter(Stecaj=="1")%>%summarise(mean(Attr1),sd(Attr1))
 
@@ -627,12 +630,13 @@ confusionMatrix(factor(predicted_nb),
                 test$Stecaj,positive = "1")
 
 
-# 9.5.1 Model sa PC
+# Model sa PC
 
 model_nbpc<-naiveBayes(Stecaj~., data=train_pc)
 
 # Predikcija
 
+#predict_nbpc<-predict(model_nbpc,test_pc), daje klase
 predict_nbpcp<-predict(model_nbpc,test_pc,type='raw')[,2]
 
 
@@ -645,18 +649,17 @@ confusionMatrix(factor(predicted_nbp),
 
 
 
-# 9.6 KNN model
+# 8.6 KNN model
 
 
-# Kreiranje sintaticki ispravnih imena, za vrednosti karakter vektora
+#kreiranje sintaticka ispravnih imena, za vrednosti karakter vektora
 
 levels(train$Stecaj)<-make.names(levels(train$Stecaj))
 levels(test$Stecaj)<-make.names(levels(test$Stecaj))
 
+# KNN 1, koristimo Accurancy za izbor optimalnog broja k
 
-# 9.6.1 KNN, koristimo Accurancy za izbor optimalnog broja K
-
-# Primena cv, za trazenje optimalne vrednosti K
+# Primena cv, za trazenje optimalne vrednosti k
 
 trControl<-trainControl(method = "repeatedcv", number = 5,repeats=3)
 
@@ -667,7 +670,7 @@ model_knn1<-train(Stecaj~., data = train, method='knn',
                   tuneLength=10 )# teuneLength broj mogucih vrednosti  K 
 
 
-model_knn1$bestTune# optimalna vrednost suseda K
+model_knn1$bestTune# optimalna vrednost suseda k
 
 plot(model_knn1,xlab="Broj suseda K",ylab='Tacnost u funkciji od K', type='b',col='red',lwd=1.5,pch='o')
 
@@ -692,7 +695,7 @@ confusionMatrix(factor(predicted1),
                 factor(actuals), positive = "1")
 
 
-# 9.6.2 KNN2, koristimo ROC za izbor k
+# 8.6.1 KNN2, koristimo ROC za izbor k
 
 trControl<-trainControl(method = "repeatedcv", number = 5,repeats=3,classProbs = T,summaryFunction = twoClassSummary)
 
@@ -726,7 +729,7 @@ perf2<-performance(prediction(predict_knn2, actuals),"tpr", "fpr")
 
 plot(perf2,colorize=TRUE,print.cutoffs.at=seq(0.1,by=0.1))
 
-# Usvojena je granicna vrednost verovatnoce 0.3, za pozitivan ishod (stecaj), kako bi modeli bili uporedivi
+# Tacnost modela, za usvojenu granicunu vrednost verovatnoce 0.3 za pozitivan ishod, kako bi modeli bili uporedivi
 
 
 predicted_knn2 <- ifelse(predict_knn2 > 0.3, 1,0)
@@ -734,11 +737,11 @@ confusionMatrix(factor(predicted_knn2),
                 factor(actuals),positive = "1")
 
 
-# 9.7  SUPORT VECTOR MACHINE linear
+# 8.7  SUPORT VECTOR MACHINE linear
 
 trControl<-trainControl(method = "cv", number = 5, summaryFunction=twoClassSummary,classProbs=TRUE)#za izbor modela na bazi ROC
 
-# 9.7.1 Kreiranje  modela, SVM sa linearnom Kernel funkcijom
+# Kreiranje  modela, SVM sa linearnom Kernel funkcijom
 
 model_svmlin <- train(Stecaj ~., data = train, method = "svmLinear", trControl=trControl,metric="ROC")
 
@@ -775,7 +778,7 @@ confusionMatrix(factor(predicted_svmlin),
                 factor(actuals),positive = "1")
 
 
-# 9.7.2  SVM Radial.  Kreiranje modela, SVM sa nelinearnom kernel funkcijom (Radial)
+# 8.7.1  SVM Radial.  Kreiranje modela, SVM sa nelinearnom kernel funkcijom (Radial)
 
 model_svmradial <- train(Stecaj ~., data = train, method = "svmRadial", trControl=trControl, tuneLength = 5,metric="ROC")
 
@@ -786,6 +789,8 @@ model_svmradial$bestTune
 # Prikaz modela
 
 plot(model_svmradial)
+
+
 impattr_svmradial<-data.frame(varImp(model_svmradial)[[1]])
 impattr_svmradial<-rownames_to_column(impattr_svmradial)
 
@@ -800,11 +805,12 @@ predict_svmradial<-predict(model_svmradial,test,type='prob')[,2]
 # Tacnost modela, za usvojenu granicunu vrednost verovatnoce 0.3 za pozitivan ishod
 
 predicted_svmradial <- ifelse( predict_svmradial> 0.3, 1,0)
+
 confusionMatrix(factor(predicted_svmradial),
                 factor(actuals),positive = "1")
 
 
-# 9.7.3 SVM Poli
+# 8.7.2 SVM Poli
 
 # Kreiranje modela, SVM sa nelinearnom kernel funkcijom (polinomalna)
 
@@ -837,15 +843,14 @@ confusionMatrix(factor(predicted_svmpoli),
 
 
 
-# 10.  Z SCORE  predikcija 
+# 9.  Z SCORE  predikcija 
 
-# Podaci za z score, nisu scaled
+# Podaci za z score, tacnost predikcije,  nisu scaled
 
 test_noscale<-stecaj_bezekstrema_bezNA[-split,c(1,4,7,8,9,10)]
 
-# 10.1 Opsti Altman z score model
 
-# a je  X3 je working capitalk/TA, b je  X6 je retain earn/TA, c je X7 je ebita/TA, d je X8 je book equity/TL i e je X9 je sales/TA
+# a je Attr3 je working capitalk/TA, b je  Attr6 je retain earn/TA, c je Attr7 je ebita/TA, d je Attr8 je book equity/TL i e je Attr9 je sales/TA
 # z funkci  ce vratit 1 za kompanije u stecaju
 
 z_funkcija<-function(x){
@@ -859,11 +864,11 @@ z_funkcija<-function(x){
   
   if (z<1.81) {
     
-    return(1)# kompanija u stecaju
+    return(1)# komanija u stecaju
     
   }else {
     
-    return(0) # 0 oznacava komanije za koje model ne predvidja stecaj ili se ne moze odrediti
+    return(0) # 0 oznacava komanije za koje po modelu ne proizilazi stecaj ili se ne moze odrediti
   }
   
 }
@@ -877,7 +882,7 @@ confusionMatrix(test_noscale$Stecaj,
                 factor(z_score),positive = "1")
 
 
-# 10.2 Emerging market, Altman z score model
+# B emerging market
 
 z_funkcija<-function(x){
   
@@ -894,7 +899,7 @@ z_funkcija<-function(x){
     
   }else {
     
-    return(0) #  0 oznacava komanije za koje model ne predvidja stecaj ili se ne moze odrediti
+    return(0) # 0 oznacava komanije za koje po modelu ne proizilazi stecaj ili se ne moze odrediti
   }
   
 }
