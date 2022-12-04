@@ -404,7 +404,7 @@ df_regkoeficijenti[order(-abs(df_regkoeficijenti$x)),][c(1:5),]# 5 najvecih reg 
 
 # LDA
 
-model_lda<-lda(Stecaj~ . -Attr18 -Attr7 -Attr14 -Attr52 -Attr32 -Attr10 -Attr2 -Attr17 -Attr8 -Attr54 , data=train)
+model_lda<-lda(Stecaj~ . , data=train)
 model_lda
 
 par(mar=c(1,1,1,1))
@@ -435,7 +435,7 @@ impattr_lda[order(-abs(impattr_lda$RegKoeficijenti)),][c(1:5),]# 5 najvecih reg 
 
 # QDA
 
-model_qda<-qda(Stecaj~ . -Attr18 -Attr7 -Attr14 -Attr52 -Attr32 -Attr10 -Attr2 -Attr17 -Attr8 -Attr54 , data=train)
+model_qda<-qda(Stecaj~ . , data=train)
 model_qda
 
 # Predikcija
