@@ -132,7 +132,7 @@ normal_prediktor
 
 cat("Prediktori sa normalnom distribucijom su  ",row.names(normal_prediktor)[2],"\n")
 
-hist(stecaj_bezNA$Attr29)
+hist(stecaj_bezNA$Attr29, main="Histogram varijable X29", xlab="X29")
 
 
 # 5. PROVERA POSTOJANJA MULTIKOLINEARNOSTI 
