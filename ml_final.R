@@ -514,7 +514,7 @@ imp_prediktora[order(imp_prediktora$MeanDecreaseAccuracy, decreasing = T),][1:5,
 
 # Graficki prikaz informativnosti prediktora
 
-varImpPlot(model_rf$finalModel,type=1, cex=0.5, main = "Informativnost prediktora")# Mean decrease accuracy, koliko se smanji tacnost modela ako se dati prediktor izostavi
+varImpPlot(model_rf$finalModel,type=1, cex=0.5,n.var=min(5, nrow(model_rf$importance)), main = "Informativnost prediktora")# Mean decrease accuracy, koliko se smanji tacnost modela ako se dati prediktor izostavi
 
 # Predikcija primenom RF modela
 
