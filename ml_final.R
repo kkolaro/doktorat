@@ -911,8 +911,6 @@ table(test_noscale$Stecaj,factor(z_score))
 confusionMatrix(test_noscale$Stecaj,
                 factor(z_score),positive = "1")
 
-#######################################################################
-
 
 
 # Vracanje warn messages
