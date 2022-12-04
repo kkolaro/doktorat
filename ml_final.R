@@ -386,7 +386,7 @@ predict_elasnet<-model_elasnet%>%predict(newx=x_test,type="response")
 
 # Tacnost modela
 
-predicted_elasnet<-ifelse(predict_elasnet>0.1,"1","0")
+predicted_elasnet<-ifelse(predict_elasnet>0.3,"1","0")
 confusionMatrix(factor(predicted_elasnet), test$Stecaj, positive = '1')
 
 # Najvazniji, najinformativniji prediktori
