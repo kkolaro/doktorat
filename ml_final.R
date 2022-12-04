@@ -848,7 +848,7 @@ test_noscale<-stecaj_bezekstrema_bezNA[-split,c(1,4,7,8,9,10)]
 
 
 # X3 je working capitalk/TA, b je  X6 je retain earn/TA, c je X7 je ebita/TA, d je X8 je book equity/TL i e je X9 je sales/TA
-# z funkci  ce vratit 1 za kompanije u stecaju
+# z funkcija  ce vratit 1 za kompanije u stecaju
 
 z_funkcija<-function(x){
   
