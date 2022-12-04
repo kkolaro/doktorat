@@ -847,7 +847,7 @@ confusionMatrix(factor(predicted_svmpoli),
 test_noscale<-stecaj_bezekstrema_bezNA[-split,c(1,4,7,8,9,10)]
 
 
-# a je Attr3 je working capitalk/TA, b je  Attr6 je retain earn/TA, c je Attr7 je ebita/TA, d je Attr8 je book equity/TL i e je Attr9 je sales/TA
+# X3 je working capitalk/TA, b je  X6 je retain earn/TA, c je X7 je ebita/TA, d je X8 je book equity/TL i e je X9 je sales/TA
 # z funkci  ce vratit 1 za kompanije u stecaju
 
 z_funkcija<-function(x){
