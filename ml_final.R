@@ -37,6 +37,8 @@ tek_seting <- getOption("warn")
 
 options(warn = -1)
 
+# 1. FORMIRANJE  DATA SETA
+
 # Import podataka
 
 stecaj_1<-read.arff(choose.files())# RWeka, file 5
@@ -66,11 +68,6 @@ colnames(stecaj)[65]<-'Stecaj'
 # Provera balansiranosti podataka
 
 round (prop.table( as.table(table(stecaj$Stecaj))),3)
-
-
-
-
-# 1. FORMIRANJE  DATA SETA
 
 
 # 2. OPIS PODATAKA
