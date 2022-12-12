@@ -191,6 +191,14 @@ test  <- stecaj_bezekstrema_bezNA_scaled[-split,]
 prop.table(table(train$Stecaj))
 prop.table(table(test$Stecaj))
 
+# Odredjivanje znacaja prediktora van ML modela, primenom biserialne korelacije (Pearson, 1909)
+
+cor_pred_zavisna<-sapply(1:64, function(i) biserial.cor(train[,i],train$Stecaj))
+
+atributi<-c(1:64)
+vaznost_attr<-data.frame(atributi,cor_pred_zavisna)
+vaznost_attr[order(abs(vaznost_attr$cor_pred_zavisna), decreasing = TRUE), ][1:5,]
+
 
 # 7. KREIRANJE PRINCIPALNIH KOMPONENTI pc.
 
