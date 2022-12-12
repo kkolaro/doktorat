@@ -2,6 +2,7 @@
 # ANALIZA PERFORMANSI KLASIFIKACIONIH ALGORITAMA
 
 library(foreign)
+library(ltm)
 library(mice)
 library(mda)# fda regresiju
 library(randomForest)
