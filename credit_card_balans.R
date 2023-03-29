@@ -862,6 +862,7 @@ auc_h2o_gbm <- h2o.auc(h2o.performance(prvi_gbm, newdata = test_df_h2o))
 
 bs_h2o_gbm<-round(BrierScore(as.numeric(actuals)-1,predict_h2o_gbm),3)
 
+# GLM
 
 drugi_glm <- h2o.glm(x = x,
                      y = y,
