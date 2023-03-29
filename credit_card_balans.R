@@ -810,7 +810,7 @@ plot.roc(test$default.payment.next,predict_svmpoli,print.auc = T, add = T,lwd= 1
 legend("topleft", legend=c("SVM L","SVM R","SVM P"), col=c("chocolate","red","blue"), lwd=1, cex=.8)
 
 
-# 7. Heterogeni modeli, konsolidacija
+# 7. Heterogeni modeli
 
 # Inicijalizacija h2o
 
