@@ -1,3 +1,3 @@
 # doktorat
-podaci fajla stecaj, su rezultat  sukcesivnog importa fajlova  5year.arff, 1year.arff, 2year.arff,4year.arrf. Podaci se koriste u ml_final.r
-uci_credit_card.xls koriste se u cred_card_fin.r
+
+uci_credit_card.csv  koriste se u cred_card_fin.r. “Default of credit card clents Data“ . Autori je I-Cheng Yeh sa Department of Information Management, Chung Hua University, Taiwan.
