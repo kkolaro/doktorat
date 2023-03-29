@@ -653,7 +653,7 @@ model_poredjenje%>%htmlTable(caption="Pokazatelji performansi K NN modela")
 
 # 6  SUPORT VECTOR MACHINE linear
 
-# Kreiranje sintaticka ispravnih imena, za vrednosti karakter vektora
+#  Kreiranje sintaticki ispravnih imena, za vrednosti kategoricke promenjive
 
 levels(train$default.payment.next.month)<-make.names(levels(train$default.payment.next.month))
 levels(test$default.payment.next.month)<-make.names(levels(test$default.payment.next.month))
