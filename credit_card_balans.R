@@ -657,7 +657,7 @@ model_poredjenje%>%htmlTable(caption="Pokazatelji performansi K NN modela")
 
 levels(train$default.payment.next.month)<-make.names(levels(train$default.payment.next.month))
 levels(test$default.payment.next.month)<-make.names(levels(test$default.payment.next.month))
-trControl<-trainControl(method = "cv", number = 5,classProbs=TRUE)#za izbor modela na bazi ROC
+trControl<-trainControl(method = "cv", number = 5,classProbs=TRUE)
 
 # Kreiranje  modela, SVM sa linearnom Kernel funkcijom
 
