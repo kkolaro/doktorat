@@ -771,7 +771,7 @@ model_poredjenje<-data.frame(Model="KN",Tacnost= round(cm_knn$overall[1],3),
 model_poredjenje%>%htmlTable(caption="Pokazatelji performansi K NN modela")
 
 
-# 6.9  SUPORT VECTOR MACHINE linear
+# 6.9  SUPORT VECTOR MACHINE 
 
 # Kreiranje sintaticki ispravnih imena, za vrednosti kategoricke promenjive
 
