@@ -51,7 +51,7 @@ library(h2o)
 
 # Import podataka
 
-default_cr<-read.csv(choose.files())# Import UCI_credit_card.csv
+default_cr<-read.csv(choose.files())# Import UCI_credit_card.csv, https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients
 default_cr<-default_cr[sample(1:(nrow(default_cr)-10000)),]# smanjio sam broj uzoraka za 10,000
 
 # Provera balansiranosti podataka
