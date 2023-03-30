@@ -199,7 +199,7 @@ actuals<-test$default.payment.next.month# sacuvacemo originalne vrednosti za K N
 default_numeric<-select_if(default_cr_norm,is.numeric)
 
 
-pc<-prcomp(default_numeric,center=F, scale=F) # kreiranje PC1...PC23
+pc<-prcomp(default_numeric) # kreiranje PC1...PC23
 
 res.pca<-PCA(select_if(default_cr_norm,is.numeric),grap=F)
 fviz_eig(res.pca,addlabels = T,ncp=10)# varijacija explained sa svakom PC
